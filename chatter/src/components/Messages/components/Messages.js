@@ -1,37 +1,66 @@
-import React, { useContext, useEffect } from "react";
-import io from "socket.io-client";
-import useSound from "use-sound";
-import config from "../../../config";
-import LatestMessagesContext from "../../../contexts/LatestMessages/LatestMessages";
-import TypingMessage from "./TypingMessage";
+import React, { useCallback, useEffect, useState } from "react";
 import Header from "./Header";
 import Footer from "./Footer";
 import Message from "./Message";
 import "../styles/_messages.scss";
+import Typing from "./TypingMessage";
+import { SOCKET_EVENTS } from "../../../common/constants/socketEvents";
 
-const URL = process.env.NODE_ENV === "production" ? config.BOT_SERVER_ENDPOINT : "http://localhost:4001";
+import io from "socket.io-client";
+import config from "../../../config";
 
-const socket = io(URL, { transports: ["websocket", "polling", "flashsocket"] });
+const socket = io(config.BOT_SERVER_ENDPOINT, { transports: ["websocket", "polling", "flashsocket"] });
 
 function Messages() {
-  const [playSend] = useSound(config.SEND_AUDIO_URL);
-  const [playReceive] = useSound(config.RECEIVE_AUDIO_URL);
-  const { setLatestMessage } = useContext(LatestMessagesContext);
+  const [isTyping, setIsTyping] = useState(false);
 
-  useEffect(() => {
-    socket.on("connect", console.log("connected"));
+  const sendMessage = useCallback(() => {
+    const userMessage = "how are you?";
+    socket.emit(SOCKET_EVENTS.USER_MESSAGE_EVENT, userMessage);
   }, []);
 
-  const sendMessage = () => {
-    const messages = ["test1", "test2", "test3"];
-    socket.emit("user-message", messages);
-  };
+  useEffect(() => {
+    const handleConnect = () => {
+      socket.on(SOCKET_EVENTS.CONNECT, () => {
+        console.log("connected");
+      });
+    };
+
+    const handleBotTyping = () => {
+      socket.on(SOCKET_EVENTS.BOT_TYPING_EVENT, () => {
+        console.log("typing");
+        setIsTyping(true);
+      });
+    };
+
+    const handleBotResponse = () => {
+      socket.on(SOCKET_EVENTS.BOT_MESSAGE_EVENT, (message) => {
+        console.log(message, "bot response");
+        setIsTyping(false);
+      });
+    };
+
+    handleConnect();
+    handleBotTyping();
+    handleBotResponse();
+
+    return () => {
+      socket.off(SOCKET_EVENTS.CONNECT);
+      socket.off(SOCKET_EVENTS.BOT_TYPING_EVENT);
+      socket.off(SOCKET_EVENTS.BOT_MESSAGE_EVENT);
+    };
+  }, []);
 
   return (
     <div className="messages">
       <Header />
-      <div className="messages__list" id="message-list"></div>
-      <Footer message={"test"} sendMessage={sendMessage} onChangeMessage={() => console.log("test")} />
+      <div className="messages__list" id="message-list">
+        {/* {messages.map((message) => (
+          <Message message={message} key={message.id} />
+        ))} */}
+        {isTyping && <Typing />}
+      </div>
+      <Footer message={"how are you?"} sendMessage={sendMessage} onChangeMessage={() => console.log("test")} />
     </div>
   );
 }

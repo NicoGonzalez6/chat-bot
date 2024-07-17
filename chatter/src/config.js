@@ -1,5 +1,10 @@
+import reciveSound from "./assets/sounds/receive.mp3";
+import sendSound from "./assets/sounds/send.mp3";
+
+const isProduction = process.env.NODE_ENV === "production";
+
 export default {
-  BOT_SERVER_ENDPOINT: 'https://carol.alexgurr.com',
-  SEND_AUDIO_URL: 'https://puu.sh/GSHJ0/25fae22f76.mp3',
-  RECEIVE_AUDIO_URL: 'https://puu.sh/GSHIU/df806a9cb8.mp3'
+  BOT_SERVER_ENDPOINT: isProduction ? "https://carol.alexgurr.com" : "http://localhost:4001",
+  SEND_AUDIO: sendSound,
+  RECEIVE_AUDIO: reciveSound,
 };
