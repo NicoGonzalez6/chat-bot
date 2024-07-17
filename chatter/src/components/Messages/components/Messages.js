@@ -20,7 +20,7 @@ function Messages() {
     <div className="messages">
       <Header />
       <div className="messages__list" id="message-list"></div>
-      <Footer message={"test"} sendMessage={"sendMessage"} onChangeMessage={() => console.log("test")} />
+      <Footer message={"test"} sendMessage={() => console.log("send")} onChangeMessage={() => console.log("test")} />
     </div>
   );
 }
