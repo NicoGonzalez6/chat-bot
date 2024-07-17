@@ -17,28 +17,36 @@ const {
   MAX_NATURAL_PAUSE_S,
 } = require("./constants");
 
+// Routes
+const userRoutes = require("./routes/user");
+
 const app = express();
 const http = require("http").createServer(app);
-const router = express.Router();
+
 const io = require("socket.io")(http);
 
 let botResponses = null;
+const router = express.Router();
 
 app.use(router);
 app.use(cors({ origin: "*" }));
+app.use(express.json());
 app.use(express.static(__dirname + "/public"));
+app.use("/api/v1", userRoutes);
 
 io.on("connection", (socket) => {
-  socket.on(USER_MESSAGE_EVENT, (message) => {
-    setTimeout(() => {
-      // Don't emit a typing event if we've set typing seconds to 0
-      if (MAX_TYPING_S) {
-        socket.emit(BOT_TYPING_EVENT, []);
-      }
+  socket.on(USER_MESSAGE_EVENT, ({ message, userId }) => {
+    if (userId === "bot") {
       setTimeout(() => {
-        socket.emit(BOT_MESSAGE_EVENT, getBotResponse(message, botResponses));
-      }, getRandomDelay(MIN_TYPING_S, MAX_TYPING_S));
-    }, getRandomDelay(MIN_NATURAL_PAUSE_S, MAX_NATURAL_PAUSE_S));
+        // Don't emit a typing event if we've set typing seconds to 0
+        if (MAX_TYPING_S) {
+          socket.emit(BOT_TYPING_EVENT, {});
+        }
+        setTimeout(() => {
+          socket.emit(BOT_MESSAGE_EVENT, getBotResponse(message, botResponses));
+        }, getRandomDelay(MIN_TYPING_S, MAX_TYPING_S));
+      }, getRandomDelay(MIN_NATURAL_PAUSE_S, MAX_NATURAL_PAUSE_S));
+    }
   });
 });
 
