@@ -2,12 +2,11 @@ import React, { useCallback, useEffect, useState } from "react";
 import Header from "./Header";
 import Footer from "./Footer";
 import Message from "./Message";
-import "../styles/_messages.scss";
 import Typing from "./TypingMessage";
 import { SOCKET_EVENTS } from "../../../common/constants/socketEvents";
-
 import io from "socket.io-client";
 import config from "../../../config";
+import "../styles/_messages.scss";
 
 const socket = io(config.BOT_SERVER_ENDPOINT, { transports: ["websocket", "polling", "flashsocket"] });
 
@@ -27,14 +26,14 @@ function Messages() {
     };
 
     const handleBotTyping = () => {
-      socket.on(SOCKET_EVENTS.BOT_TYPING_EVENT, () => {
+      socket.on(SOCKET_EVENTS.BOTS_EVENTS.BOT_TYPING_EVENT, () => {
         console.log("typing");
         setIsTyping(true);
       });
     };
 
     const handleBotResponse = () => {
-      socket.on(SOCKET_EVENTS.BOT_MESSAGE_EVENT, (message) => {
+      socket.on(SOCKET_EVENTS.BOTS_EVENTS.BOT_MESSAGE_EVENT, (message) => {
         console.log(message, "bot response");
         setIsTyping(false);
       });
@@ -46,8 +45,8 @@ function Messages() {
 
     return () => {
       socket.off(SOCKET_EVENTS.CONNECT);
-      socket.off(SOCKET_EVENTS.BOT_TYPING_EVENT);
-      socket.off(SOCKET_EVENTS.BOT_MESSAGE_EVENT);
+      socket.off(SOCKET_EVENTS.BOTS_EVENTS.BOT_TYPING_EVENT);
+      socket.off(SOCKET_EVENTS.BOTS_EVENTS.BOT_MESSAGE_EVENT);
     };
   }, []);
 

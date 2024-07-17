@@ -5,16 +5,19 @@ import UserList from "../../../components/UserList";
 import Messages from "../../../components/Messages";
 import IconBackground from "./IconBackground";
 import "../styles/_core-layout.scss";
+import { CurrentUserProvider } from "../../../contexts/CurrentUser/CurrentUser";
 
 export default function CoreLayout() {
   return (
     <div className="core">
-      <IconBackground />
-      <LastMessageProvider>
-        <UserList />
-        <Messages />
-        <ContactPanel />
-      </LastMessageProvider>
+      <CurrentUserProvider>
+        <IconBackground />
+        <LastMessageProvider>
+          <UserList />
+          <Messages />
+          <ContactPanel />
+        </LastMessageProvider>
+      </CurrentUserProvider>
     </div>
   );
 }
