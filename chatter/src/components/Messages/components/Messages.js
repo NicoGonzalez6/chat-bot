@@ -1,4 +1,4 @@
-import React, { useContext } from "react";
+import React, { useContext, useEffect } from "react";
 import io from "socket.io-client";
 import useSound from "use-sound";
 import config from "../../../config";
@@ -18,11 +18,20 @@ function Messages() {
   const [playReceive] = useSound(config.RECEIVE_AUDIO_URL);
   const { setLatestMessage } = useContext(LatestMessagesContext);
 
+  useEffect(() => {
+    socket.on("connect", console.log("connected"));
+  }, []);
+
+  const sendMessage = () => {
+    const messages = ["test1", "test2", "test3"];
+    socket.emit("user-message", messages);
+  };
+
   return (
     <div className="messages">
       <Header />
       <div className="messages__list" id="message-list"></div>
-      <Footer message={"test"} sendMessage={() => console.log("send")} onChangeMessage={() => console.log("test")} />
+      <Footer message={"test"} sendMessage={sendMessage} onChangeMessage={() => console.log("test")} />
     </div>
   );
 }
