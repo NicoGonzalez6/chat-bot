@@ -1,12 +1,11 @@
 import React, { useState, createContext, useCallback } from "react";
-import initialMessages from "./constants/initialMessages";
 
 const LatestMessagesContext = createContext({});
 
 export default LatestMessagesContext;
 
 export function LastMessageProvider({ children }) {
-  const [messages, setMessages] = useState(initialMessages);
+  const [messages, setMessages] = useState([]);
 
   const setLatestMessage = useCallback(
     (userId, value) => {

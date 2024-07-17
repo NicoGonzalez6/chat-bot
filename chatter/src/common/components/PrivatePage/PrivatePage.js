@@ -1,13 +1,13 @@
 import { Navigate } from "react-router-dom";
-import { useCurrentUser } from "../../../hooks/useCurrentUser";
+import { useAuthContext } from "../../../hooks/useAuth";
 
 /**
  * Simple component to protect private pages
  */
 export const Privatepage = ({ children }) => {
-  const { currentUser } = useCurrentUser();
+  const { isAuthenticated } = useAuthContext();
 
-  if (!currentUser) {
+  if (!isAuthenticated) {
     return <Navigate to={"/auth"} />;
   } else {
     return children;

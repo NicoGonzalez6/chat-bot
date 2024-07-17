@@ -1,14 +1,14 @@
 import { Navigate } from "react-router-dom";
-import { useUserStorageSettings } from "../../../hooks/useUserStorage";
+import { useAuthContext } from "../../../hooks/useAuth";
 
 /**
  * Simple component to prevent public pages
  * that the user should´n access once the user is created.
  */
 export const PublicPage = ({ children }) => {
-  const { userStorageState } = useUserStorageSettings();
+  const { isAuthenticated } = useAuthContext();
 
-  if (userStorageState) {
+  if (isAuthenticated) {
     return <Navigate to={"/"} />;
   } else {
     return children;

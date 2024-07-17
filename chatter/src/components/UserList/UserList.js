@@ -2,7 +2,6 @@ import React, { useContext } from "react";
 import cx from "classnames";
 import LatestMessagesContext from "../../contexts/LatestMessages/LatestMessages";
 import UserProfile from "../../common/components/UserProfile/UserProfile";
-import USERS from "./constants/users";
 import "./_user-list.scss";
 
 function User({ icon, name, lastActive, isOnline, userId, color }) {
@@ -23,6 +22,8 @@ function User({ icon, name, lastActive, isOnline, userId, color }) {
 }
 
 export default function UserList() {
+  const USERS = [{ name: "Carol", userId: "bot", icon: "fas fa-comment-dots", isOnline: true, color: "#4DB8EF" }];
+
   return (
     <div className="user-list">
       <div className="user-list__header">

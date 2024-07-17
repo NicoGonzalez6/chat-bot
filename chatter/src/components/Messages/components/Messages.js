@@ -2,7 +2,7 @@ import React, { useCallback, useEffect, useState } from "react";
 import Header from "./Header";
 import Footer from "./Footer";
 import Typing from "./TypingMessage";
-import { SOCKET_EVENTS } from "../../../common/constants/socketEvents";
+import { SOCKET_EVENTS } from "../../../common/constants";
 import io from "socket.io-client";
 import config from "../../../config";
 import "../styles/_messages.scss";

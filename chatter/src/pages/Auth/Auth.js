@@ -1,7 +1,6 @@
 import React, { useCallback, useState } from "react";
 import "./styles/_auth-page.scss";
 import { useNavigate } from "react-router-dom";
-import { useCurrentUser } from "../../hooks/useCurrentUser";
 
 /**
  * Generate a random number between 0 and 9999
@@ -19,7 +18,6 @@ const newUserNumber = generateUserNumber();
  * @TODO Create validation so it cant have repited user numbers
  */
 export const Auth = () => {
-  const { authenticateUser } = useCurrentUser();
   const navigate = useNavigate();
 
   const [formValues, setFormValues] = useState({ name: "", number: newUserNumber });
@@ -34,7 +32,6 @@ export const Auth = () => {
   const submitHandler = useCallback(
     (evt) => {
       evt.preventDefault();
-      authenticateUser(formValues);
       navigate("/");
     },
     [formValues.name]

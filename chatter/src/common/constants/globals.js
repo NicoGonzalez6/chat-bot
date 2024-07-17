@@ -8,3 +8,5 @@ export const SOCKET_EVENTS = {
     USER_MESSAGE_EVENT: "user-message",
   },
 };
+
+export const CAROL_DEFAULT_MESSAGE = "Hi! My name's Carol.";
