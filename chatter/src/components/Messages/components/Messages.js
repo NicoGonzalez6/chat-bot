@@ -9,7 +9,9 @@ import Footer from "./Footer";
 import Message from "./Message";
 import "../styles/_messages.scss";
 
-const socket = io(config.BOT_SERVER_ENDPOINT, { transports: ["websocket", "polling", "flashsocket"] });
+const URL = process.env.NODE_ENV === "production" ? config.BOT_SERVER_ENDPOINT : "http://localhost:4001";
+
+const socket = io(URL, { transports: ["websocket", "polling", "flashsocket"] });
 
 function Messages() {
   const [playSend] = useSound(config.SEND_AUDIO_URL);
