@@ -15,9 +15,18 @@ const {
   MAX_TYPING_S,
   MIN_NATURAL_PAUSE_S,
   MAX_NATURAL_PAUSE_S,
+  DEFAULT_BOT_USER,
 } = require("./constants");
 
+/**
+ * Catch async errors
+ */
+require("express-async-errors");
+
+const errorHandler = require("./middlewares/errorHandler");
+
 // Routes
+const authRoutes = require("./routes/auth");
 const userRoutes = require("./routes/user");
 
 const app = express();
@@ -32,11 +41,13 @@ app.use(router);
 app.use(cors({ origin: "*" }));
 app.use(express.json());
 app.use(express.static(__dirname + "/public"));
-app.use("/api/v1", userRoutes);
+app.use("/api/v1/auth", authRoutes);
+app.use("/api/v1/user", userRoutes);
+app.use(errorHandler);
 
 io.on("connection", (socket) => {
   socket.on(USER_MESSAGE_EVENT, ({ message, userId }) => {
-    if (userId === "bot") {
+    if (userId === DEFAULT_BOT_USER.id) {
       setTimeout(() => {
         // Don't emit a typing event if we've set typing seconds to 0
         if (MAX_TYPING_S) {

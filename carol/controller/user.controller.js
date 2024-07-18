@@ -1,12 +1,10 @@
-const User = require("../models/User");
+const { DEFAULT_BOT_USER } = require("../constants");
+const { prisma } = require("../prisma/prisma.client");
+const { StatusCodes } = require("http-status-codes");
 
-/**
- * Register
- */
-const register = async (req, res) => {
-  const { name, number } = req.body;
-  const newUser = new User(name, number);
-  res.status(200).json({ ...newUser });
+const getAllUsers = async (_, res) => {
+  const users = await prisma.user.findMany();
+  res.status(StatusCodes.OK).json({ users: users, bot: DEFAULT_BOT_USER });
 };
 
-module.exports = { register };
+module.exports = { getAllUsers };
