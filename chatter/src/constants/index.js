@@ -22,4 +22,7 @@ export const TOAST_MESSAGES = {
 export const ENDPOINTS = {
   SIGN_UP: "/auth/sign-up",
   SIGN_IN: "/auth/sign-in",
+  GET_CONTACTS: "/user",
 };
+
+export const USER_STORAGE_KEY = "UserStorageSettings";

@@ -1,11 +1,27 @@
 import { toast } from "react-toastify";
 import reciveSound from "./assets/sounds/receive.mp3";
 import sendSound from "./assets/sounds/send.mp3";
-import { VITE_BASE_API_URL } from "./common/constants";
+import { VITE_BASE_API_URL } from "./constants";
 import axios, { AxiosError } from "axios";
+import io from "socket.io-client";
 
+export const CONFIG = {
+  BOT_SERVER_ENDPOINT: VITE_BASE_API_URL,
+  SEND_AUDIO: sendSound,
+  RECEIVE_AUDIO: reciveSound,
+};
+
+/**
+ * AXIOS SINGLETON INSTANCE
+ */
 export class AxiosInstance {
+  static instance = null;
+
   constructor() {
+    if (AxiosInstance.instance) {
+      return AxiosInstance.instance;
+    }
+
     this.instance = axios.create({
       baseURL: `${VITE_BASE_API_URL}/api/v1`,
       timeout: 10000,
@@ -15,16 +31,16 @@ export class AxiosInstance {
     });
 
     this.instance.interceptors.request.use(this.handleRequest, this.handleError);
-
     this.instance.interceptors.response.use(this.handleResponse, this.handleError);
-  }
 
+    AxiosInstance.instance = this;
+  }
   handleRequest(config) {
     return config;
   }
 
   handleResponse(response) {
-    return response;
+    return response?.data;
   }
 
   handleError(error) {
@@ -41,10 +57,59 @@ export class AxiosInstance {
   }
 }
 
+/**
+ * SOCKET SINGLETON INSTANCE
+ */
+class SocketInstance {
+  constructor() {
+    if (!SocketInstance.instance) {
+      this.socket = io(CONFIG.BOT_SERVER_ENDPOINT, {
+        transports: ["websocket", "polling", "flashsocket"],
+      });
+      this.setupInterceptors();
+      SocketInstance.instance = this;
+    }
+
+    return SocketInstance.instance;
+  }
+
+  setupInterceptors() {
+    this.socket.on("connect_error", (err) => {
+      console.error("Connection error:", err);
+    });
+
+    this.socket.on("disconnect", () => {
+      console.warn("Socket disconnected");
+    });
+  }
+
+  on(event, handler) {
+    this.socket.on(event, handler);
+  }
+
+  off(event, handler) {
+    this.socket.off(event, handler);
+  }
+
+  emit(event, data) {
+    this.socket.emit(event, data);
+  }
+
+  disconnect() {
+    this.socket.disconnect();
+  }
+
+  getInstance() {
+    return this.socket;
+  }
+}
+
+export const socket = new SocketInstance();
 export const AXIOS_INSTANCE = new AxiosInstance().getInstance();
 
-export default {
-  BOT_SERVER_ENDPOINT: VITE_BASE_API_URL,
-  SEND_AUDIO: sendSound,
-  RECEIVE_AUDIO: reciveSound,
-};
+/**
+ * WE FREEZE THE SINGLETON TO PREVENT
+ * MODIFICATIONS
+ */
+Object.freeze(socket);
+Object.freeze(AXIOS_INSTANCE);

@@ -1,4 +1,4 @@
-@import "../../styles/vars";
+@import "../../../../styles/vars";
 
 .user-list {
   width: 25%;
@@ -99,6 +99,10 @@
       }
 
       &__profile {
+      }
+
+      &__name {
+        text-transform: capitalize;
       }
 
       &__right-content {

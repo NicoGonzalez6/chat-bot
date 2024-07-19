@@ -1,28 +1,26 @@
-import React, { useContext } from "react";
+import React from "react";
 import cx from "classnames";
-import LatestMessagesContext from "../../contexts/LatestMessages/LatestMessages";
-import UserProfile from "../../common/components/UserProfile/UserProfile";
+import UserProfile from "../../../../components/UserProfile/UserProfile";
+import { useContactsContext } from "../../../../hooks/useContacts";
 import "./_user-list.scss";
 
 function User({ icon, name, lastActive, isOnline, userId, color }) {
-  const { messages } = useContext(LatestMessagesContext);
-
   return (
     <div className="user-list__users__user">
       <UserProfile icon={icon} name={name} color={color} />
       <div className="user-list__users__user__right-content">
         <div className="user-list__users__user__title">
-          <p>{name}</p>
+          <p className="user-list__users__user__name">{name}</p>
           <p className={cx({ "user-list__users__user__online": isOnline })}>{isOnline ? "Online" : lastActive}</p>
         </div>
-        <p>{messages[userId]}</p>
+        {/* <p>{messages[userId]}</p> */}
       </div>
     </div>
   );
 }
 
 export default function UserList() {
-  const USERS = [{ name: "Carol", userId: "bot", icon: "fas fa-comment-dots", isOnline: true, color: "#4DB8EF" }];
+  const { contacts } = useContactsContext();
 
   return (
     <div className="user-list">
@@ -34,8 +32,8 @@ export default function UserList() {
         <i className="fas fa-cog" />
       </div>
       <div className="user-list__users">
-        {USERS.map((user) => (
-          <User key={user.name} {...user} />
+        {contacts.map((user) => (
+          <User key={user.id} name={user.name} icon={"fas fa-comment-dots"} color={"#4DB8EF"} isOnline={user?.isOnline} />
         ))}
       </div>
     </div>

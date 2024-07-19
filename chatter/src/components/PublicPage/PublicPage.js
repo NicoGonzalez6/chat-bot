@@ -1,5 +1,5 @@
 import { Navigate } from "react-router-dom";
-import { useAuthContext } from "../../../hooks/useAuth";
+import { useAuthContext } from "../../hooks/useAuth";
 
 /**
  * Simple component to prevent public pages
