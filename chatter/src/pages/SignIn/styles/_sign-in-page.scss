@@ -1,0 +1,32 @@
+.sign-in-page {
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  &__container {
+    width: 350px;
+    height: auto;
+    min-height: 150px;
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 2px 8px 10px rgba(0, 0, 0, 0.2);
+    padding: 16px;
+
+    &__form {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+
+      &__button {
+        border: none;
+        padding: 8px;
+        background-color: rgb(77, 184, 239);
+        color: #fff;
+        border-radius: 8px;
+        cursor: pointer;
+      }
+    }
+  }
+}

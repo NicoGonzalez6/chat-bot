@@ -1,9 +1,10 @@
 import { createBrowserRouter } from "react-router-dom";
 import { GlobalLayout } from "../layouts/CoreLayout/components/GlobalLayout";
 import { Main } from "../pages/Main/Main";
-import { Auth } from "../pages/Auth/Auth";
+import { SignUp } from "../pages/SignUp/SignUp";
 import { Privatepage } from "../common/components/PrivatePage/PrivatePage";
 import { PublicPage } from "../common/components/PublicPage/PublicPage";
+import { SignIn } from "../pages/SignIn/SignIn";
 
 export const router = createBrowserRouter([
   {
@@ -11,10 +12,18 @@ export const router = createBrowserRouter([
     element: <GlobalLayout />,
     children: [
       {
-        path: "/auth",
+        path: "/sign-up",
         element: (
           <PublicPage>
-            <Auth />
+            <SignUp />
+          </PublicPage>
+        ),
+      },
+      {
+        path: "/sign-in",
+        element: (
+          <PublicPage>
+            <SignIn />
           </PublicPage>
         ),
       },

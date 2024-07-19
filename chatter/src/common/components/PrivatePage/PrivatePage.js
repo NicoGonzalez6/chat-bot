@@ -8,7 +8,7 @@ export const Privatepage = ({ children }) => {
   const { isAuthenticated } = useAuthContext();
 
   if (!isAuthenticated) {
-    return <Navigate to={"/auth"} />;
+    return <Navigate to={"/register"} />;
   } else {
     return children;
   }
