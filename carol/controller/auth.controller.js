@@ -10,10 +10,12 @@ const signUp = async (req, res) => {
   const { name, number } = req.body;
   if (!name || !number) throw new BadRequest(GLOBAL_MESSAGES.ERROR_MESSAGES.MISSING_FIELDS);
 
+  const normalizedName = name.toLowerCase();
+
   try {
     const user = await prisma.user.create({
       data: {
-        name,
+        name: normalizedName,
         number,
       },
     });
@@ -24,7 +26,7 @@ const signUp = async (req, res) => {
     });
   } catch (e) {
     /**
-     * Try catch needed beacuse we need to catch especific
+     * Try catch needed beacuse we need to catch specific
      * prisma errors for some validations
      */
     if (e instanceof Prisma.PrismaClientKnownRequestError) {

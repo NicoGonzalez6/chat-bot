@@ -45,20 +45,24 @@ app.use("/api/v1/auth", authRoutes);
 app.use("/api/v1/user", userRoutes);
 app.use(errorHandler);
 
+const users = {};
+
 io.on("connection", (socket) => {
-  socket.on(USER_MESSAGE_EVENT, ({ message, userId }) => {
-    if (userId === DEFAULT_BOT_USER.id) {
-      setTimeout(() => {
-        // Don't emit a typing event if we've set typing seconds to 0
-        if (MAX_TYPING_S) {
-          socket.emit(BOT_TYPING_EVENT, {});
-        }
-        setTimeout(() => {
-          socket.emit(BOT_MESSAGE_EVENT, getBotResponse(message, botResponses));
-        }, getRandomDelay(MIN_TYPING_S, MAX_TYPING_S));
-      }, getRandomDelay(MIN_NATURAL_PAUSE_S, MAX_NATURAL_PAUSE_S));
-    }
-  });
+  console.log("successfully conected");
+
+  // socket.on(USER_MESSAGE_EVENT, ({ message, userId }) => {
+  //   if (userId === DEFAULT_BOT_USER.id) {
+  //     setTimeout(() => {
+  //       // Don't emit a typing event if we've set typing seconds to 0
+  //       if (MAX_TYPING_S) {
+  //         socket.emit(BOT_TYPING_EVENT, {});
+  //       }
+  //       setTimeout(() => {
+  //         socket.emit(BOT_MESSAGE_EVENT, getBotResponse(message, botResponses));
+  //       }, getRandomDelay(MIN_TYPING_S, MAX_TYPING_S));
+  //     }, getRandomDelay(MIN_NATURAL_PAUSE_S, MAX_NATURAL_PAUSE_S));
+  //   }
+  // });
 });
 
 parseResponseDataset(RESPONSES_FILE_PATH).then((parsedResponses) => {

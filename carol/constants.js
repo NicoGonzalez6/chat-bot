@@ -17,7 +17,8 @@ const MAX_NATURAL_PAUSE_S = 2;
 // Default bot users
 const DEFAULT_BOT_USER = {
   name: "carol",
-  id: "bot",
+  id: 1,
+  number: 1,
 };
 
 // Global Messages
