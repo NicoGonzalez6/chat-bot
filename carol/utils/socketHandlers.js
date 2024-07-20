@@ -1,6 +1,6 @@
 const { SOCKET_EVENTS } = require("../constants");
 const { prisma } = require("../prisma/prisma.client");
-const { BOT_MESSAGE_EVENT, MIN_TYPING_S, MAX_TYPING_S, MIN_NATURAL_PAUSE_S, MAX_NATURAL_PAUSE_S, DEFAULT_BOT_USER, RESPONSES_FILE_PATH } = require("../constants");
+const { MIN_TYPING_S, MAX_TYPING_S, MIN_NATURAL_PAUSE_S, MAX_NATURAL_PAUSE_S, DEFAULT_BOT_USER, RESPONSES_FILE_PATH } = require("../constants");
 const getRandomDelay = require("./getRandomDelay");
 const getBotResponse = require("./getBotResponse");
 const parseResponseDataset = require("./parseResponseDataset");
@@ -27,7 +27,9 @@ const handleUserChat = (socket) => {
 
   socket.on(SOCKET_EVENTS.USER_EVENTS.USER_MESSAGE_EVENT, async ({ senderId, receiverId, message }) => {
     if (receiverId === DEFAULT_BOT_USER.id) {
-      await handleBotResponse(socket, senderId, message);
+      await handleBotChat(socket, senderId, message);
+    } else {
+      await handleUsersChat(socket, senderId, receiverId, message);
     }
   });
 };
@@ -79,6 +81,8 @@ const setupSocketEvents = (io) => {
 };
 
 // Socket helpers
+
+// Function to handle typing events
 const emitTypingEvent = (socket, event, { senderId, receiverId }) => {
   for (const [id, socketId] of activeUsers.entries()) {
     if (receiverId === id) {
@@ -87,7 +91,8 @@ const emitTypingEvent = (socket, event, { senderId, receiverId }) => {
   }
 };
 
-const handleBotResponse = async (socket, senderId, message) => {
+// Handle bot chat conversations
+const handleBotChat = async (socket, senderId, message) => {
   if (activeUsers.has(senderId)) {
     const typingDelay = getRandomDelay(MIN_TYPING_S, MAX_TYPING_S);
     const pauseDelay = getRandomDelay(MIN_NATURAL_PAUSE_S, MAX_NATURAL_PAUSE_S);
@@ -132,6 +137,47 @@ const handleBotResponse = async (socket, senderId, message) => {
         socket.emit(SOCKET_EVENTS.USER_EVENTS.USER_MESSAGE_EVENT, messages);
       }, typingDelay);
     }, pauseDelay);
+  }
+};
+
+// Handle users chat conversations
+const handleUsersChat = async (socket, senderId, receiverId, message) => {
+  for (const [id, socketId] of activeUsers.entries()) {
+    if (receiverId === id) {
+      await prisma.$transaction([
+        prisma.message.create({
+          data: {
+            senderId,
+            receiverId,
+            content: message,
+          },
+        }),
+      ]);
+
+      const messages = await prisma.message.findMany({
+        where: {
+          OR: [
+            { senderId, receiverId },
+            { senderId: receiverId, receiverId: senderId },
+          ],
+        },
+        orderBy: {
+          createdAt: "asc",
+        },
+      });
+
+      return socket.to(socketId).emit(SOCKET_EVENTS.USER_EVENTS.USER_MESSAGE_EVENT, messages);
+    } else {
+      await prisma.message.create({
+        data: {
+          senderId,
+          receiverId,
+          content: message,
+        },
+      });
+
+      return socket.emit(SOCKET_EVENTS.USER_EVENTS.USER_MESSAGE_EVENT);
+    }
   }
 };
 
