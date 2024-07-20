@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import React, { memo, useCallback, useEffect, useState } from "react";
 import Header from "./Header";
 import Footer from "./Footer";
 import Typing from "./TypingMessage";
@@ -6,6 +6,7 @@ import "../styles/_messages.scss";
 import { AXIOS_INSTANCE, socket } from "../../../../../config";
 import { ENDPOINTS, SOCKET_EVENTS } from "../../../../../constants";
 import Message from "./Message";
+import debounce from "lodash.debounce";
 
 const INITIAL_TYPING_STATE = {
   typingNow: false,
@@ -37,46 +38,78 @@ function Messages({ activeContact, currentUserId }) {
     setMessage(evt.target.value);
   };
 
-  useEffect(() => {
-    const handleUserTyping = ({ senderId }) => {
-      setIsTyping({
-        typingFrom: senderId,
-        typingNow: true,
-      });
-    };
-
-    const handleUserStopTyping = () => {
-      setIsTyping({
-        typingNow: false,
-        typingFrom: undefined,
-      });
-    };
-
-    socket.on(SOCKET_EVENTS.USER_EVENTS.USER_TYPING, handleUserTyping);
-    socket.on(SOCKET_EVENTS.USER_EVENTS.USER_STOP_TYPING, handleUserStopTyping);
-    socket.on(SOCKET_EVENTS.USER_EVENTS.USER_MESSAGE_EVENT, (response) => {
-      setMessages(response);
-    });
-
-    return () => {
-      socket.off(SOCKET_EVENTS.USER_EVENTS.USER_TYPING, handleUserTyping);
-      socket.off(SOCKET_EVENTS.USER_EVENTS.USER_STOP_TYPING, handleUserStopTyping);
-    };
-  }, []);
-
-  useEffect(() => {
-    if (message) {
+  const sendTypingEvent = useCallback(
+    debounce(() => {
       socket.emit(SOCKET_EVENTS.USER_EVENTS.USER_TYPING, {
         senderId: currentUserId,
         receiverId: activeContact?.id,
       });
-    } else {
+    }, 300),
+    [currentUserId, activeContact?.id]
+  );
+
+  const sendStopTypingEvent = useCallback(
+    debounce(() => {
       socket.emit(SOCKET_EVENTS.USER_EVENTS.USER_STOP_TYPING, {
         senderId: currentUserId,
         receiverId: activeContact?.id,
       });
+    }, 300),
+    [currentUserId, activeContact?.id]
+  );
+
+  useEffect(() => {
+    const handleUserTyping = ({ senderId }) => {
+      if (senderId === activeContact?.id) {
+        setIsTyping({
+          typingFrom: senderId,
+          typingNow: true,
+        });
+      }
+    };
+
+    const handleUserStopTyping = ({ senderId }) => {
+      if (senderId === activeContact?.id) {
+        setIsTyping({
+          typingNow: false,
+          typingFrom: undefined,
+        });
+      }
+    };
+
+    const handleNewMessage = (newMessages) => {
+      if (Array.isArray(newMessages)) {
+        const filteredMessages = newMessages.some(
+          (msg) => (msg.receiverId === currentUserId && msg.senderId === activeContact?.id) || (msg.receiverId === activeContact?.id && msg.senderId === currentUserId)
+        );
+        if (filteredMessages) {
+          setMessages(newMessages);
+        }
+      }
+    };
+
+    socket.on(SOCKET_EVENTS.USER_EVENTS.USER_TYPING, handleUserTyping);
+    socket.on(SOCKET_EVENTS.USER_EVENTS.USER_STOP_TYPING, handleUserStopTyping);
+    socket.on(SOCKET_EVENTS.USER_EVENTS.USER_MESSAGE_EVENT, handleNewMessage);
+
+    return () => {
+      socket.off(SOCKET_EVENTS.USER_EVENTS.USER_TYPING, handleUserTyping);
+      socket.off(SOCKET_EVENTS.USER_EVENTS.USER_STOP_TYPING, handleUserStopTyping);
+      socket.off(SOCKET_EVENTS.USER_EVENTS.USER_MESSAGE_EVENT, handleNewMessage);
+    };
+  }, [activeContact?.id]);
+
+  useEffect(() => {
+    if (message) {
+      sendTypingEvent();
+    } else {
+      sendStopTypingEvent();
     }
-  }, [message, currentUserId, activeContact]);
+    return () => {
+      sendTypingEvent.cancel();
+      sendStopTypingEvent.cancel();
+    };
+  }, [message, sendTypingEvent, sendStopTypingEvent]);
 
   useEffect(() => {
     const getMessages = async () => {
@@ -112,4 +145,4 @@ function Messages({ activeContact, currentUserId }) {
   );
 }
 
-export default Messages;
+export default memo(Messages);
