@@ -6,16 +6,8 @@ const getBotResponse = require("./getBotResponse");
 const parseResponseDataset = require("./parseResponseDataset");
 
 let botResponses = null;
-
-/**
- * Simple implementation to track users in memory when go online and offline
- * so we can track the session in real-time
- */
 const activeUsers = new Map();
 
-/**
- * Helper function to handle user chats
- */
 const handleUserChat = (socket) => {
   socket.on(SOCKET_EVENTS.USER_EVENTS.USER_TYPING, ({ senderId, receiverId }) => {
     emitTypingEvent(socket, SOCKET_EVENTS.USER_EVENTS.USER_TYPING, { senderId, receiverId });
@@ -34,9 +26,6 @@ const handleUserChat = (socket) => {
   });
 };
 
-/**
- * Helper function when the user logs in
- */
 const handleUserOnline = async (socket, id, io) => {
   activeUsers.set(id, socket.id);
   await prisma.user.update({
@@ -47,9 +36,6 @@ const handleUserOnline = async (socket, id, io) => {
   io.emit(SOCKET_EVENTS.USER_EVENTS.USERS_ONLINE, users);
 };
 
-/**
- * Helper function when the user disconnects
- */
 const handleDisconnect = async (socket) => {
   for (const [id, socketId] of activeUsers.entries()) {
     if (socketId === socket.id) {
@@ -65,9 +51,6 @@ const handleDisconnect = async (socket) => {
   }
 };
 
-/**
- * App main sockets events
- */
 const setupSocketEvents = (io) => {
   io.on(SOCKET_EVENTS.GLOBAL_EVENTS.CONNECTION, (socket) => {
     socket.on(SOCKET_EVENTS.USER_EVENTS.USER_ONLINE, (id) => handleUserOnline(socket, id, io));
@@ -80,18 +63,13 @@ const setupSocketEvents = (io) => {
   });
 };
 
-// Socket helpers
-
-// Function to handle typing events
 const emitTypingEvent = (socket, event, { senderId, receiverId }) => {
-  for (const [id, socketId] of activeUsers.entries()) {
-    if (receiverId === id) {
-      socket.to(socketId).emit(event, { senderId });
-    }
+  const receiverSocketId = activeUsers.get(receiverId);
+  if (receiverSocketId) {
+    socket.to(receiverSocketId).emit(event, { senderId });
   }
 };
 
-// Handle bot chat conversations
 const handleBotChat = async (socket, senderId, message) => {
   if (activeUsers.has(senderId)) {
     const typingDelay = getRandomDelay(MIN_TYPING_S, MAX_TYPING_S);
@@ -140,44 +118,33 @@ const handleBotChat = async (socket, senderId, message) => {
   }
 };
 
-// Handle users chat conversations
 const handleUsersChat = async (socket, senderId, receiverId, message) => {
-  for (const [id, socketId] of activeUsers.entries()) {
-    if (receiverId === id) {
-      await prisma.$transaction([
-        prisma.message.create({
-          data: {
-            senderId,
-            receiverId,
-            content: message,
-          },
-        }),
-      ]);
+  const receiverSocketId = activeUsers.get(receiverId);
 
-      const messages = await prisma.message.findMany({
-        where: {
-          OR: [
-            { senderId, receiverId },
-            { senderId: receiverId, receiverId: senderId },
-          ],
-        },
-        orderBy: {
-          createdAt: "asc",
-        },
-      });
+  await prisma.message.create({
+    data: {
+      senderId,
+      receiverId,
+      content: message,
+    },
+  });
 
-      return socket.to(socketId).emit(SOCKET_EVENTS.USER_EVENTS.USER_MESSAGE_EVENT, messages);
-    } else {
-      await prisma.message.create({
-        data: {
-          senderId,
-          receiverId,
-          content: message,
-        },
-      });
+  const messages = await prisma.message.findMany({
+    where: {
+      OR: [
+        { senderId, receiverId },
+        { senderId: receiverId, receiverId: senderId },
+      ],
+    },
+    orderBy: {
+      createdAt: "asc",
+    },
+  });
 
-      return socket.emit(SOCKET_EVENTS.USER_EVENTS.USER_MESSAGE_EVENT);
-    }
+  if (receiverSocketId) {
+    socket.to(receiverSocketId).emit(SOCKET_EVENTS.USER_EVENTS.USER_MESSAGE_EVENT, messages);
+  } else {
+    socket.emit(SOCKET_EVENTS.USER_EVENTS.USER_MESSAGE_EVENT, messages);
   }
 };
 
