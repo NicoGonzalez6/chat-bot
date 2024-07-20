@@ -1,4 +1,4 @@
-const { GLOBAL_MESSAGES, AUTH_MESSAGES } = require("../constants");
+const { GLOBAL_MESSAGES, AUTH_MESSAGES, DEFAULT_BOT_USER } = require("../constants");
 const { BadRequest, NotFound } = require("../errors");
 const { prisma, Prisma } = require("../prisma/prisma.client");
 const { StatusCodes } = require("http-status-codes");
@@ -47,6 +47,8 @@ const signIn = async (req, res) => {
   const { number } = req.body;
 
   if (!number) throw new BadRequest(GLOBAL_MESSAGES.ERROR_MESSAGES.MISSING_FIELDS);
+
+  if (number === DEFAULT_BOT_USER.number) throw new BadRequest(GLOBAL_MESSAGES.ERROR_MESSAGES.RESERVED_VALUE);
 
   const user = await prisma.user.findUnique({
     where: {

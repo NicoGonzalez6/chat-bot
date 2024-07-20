@@ -6,6 +6,20 @@ const USER_MESSAGE_EVENT = "user-message";
 const BOT_MESSAGE_EVENT = "bot-message";
 const BOT_TYPING_EVENT = "bot-typing";
 
+const SOCKET_EVENTS = {
+  GLOBAL_EVENTS: {
+    CONNECTION: "connection",
+  },
+  USER_EVENTS: {
+    DISCONNECT: "disconnect",
+    USER_ONLINE: "user-online",
+    USERS_ONLINE: "users-online",
+    USER_MESSAGE_EVENT: "user-message",
+    USER_TYPING: "user-typing",
+    USER_STOP_TYPING: "user-stop-typing",
+  },
+};
+
 // Bot Natural Defaults
 const DEFAULT_RESPONSE = "Sorry, I didn't quite understand that.";
 const RESPONSE_MATCH_THRESHOLD = 0.4;
@@ -27,6 +41,7 @@ const GLOBAL_MESSAGES = {
     MISSING_FIELDS: "Please provide the requested values",
     EXISTING_FIELDS: "Ups the value already exists in our records.",
     INVALID_FIELD: "Invalid field type",
+    RESERVED_VALUE: "Please select a different number",
   },
 };
 
@@ -41,6 +56,7 @@ const AUTH_MESSAGES = {
 };
 
 module.exports = {
+  SOCKET_EVENTS,
   DEFAULT_BOT_USER,
   PORT,
   AUTH_MESSAGES,
