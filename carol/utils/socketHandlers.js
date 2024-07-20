@@ -32,11 +32,8 @@ const handleUserOnline = async (socket, id, io) => {
     where: { id },
     data: { isOnline: true },
   });
-  const usersWithLastMessage = await getLastMessagesForUsers(id);
-
-  console.log(usersWithLastMessage);
-
-  io.emit(SOCKET_EVENTS.USER_EVENTS.USERS_ONLINE, usersWithLastMessage);
+  const users = await prisma.user.findMany();
+  io.emit(SOCKET_EVENTS.USER_EVENTS.USERS_ONLINE, users);
 };
 
 const handleDisconnect = async (socket) => {
@@ -149,50 +146,6 @@ const handleUsersChat = async (socket, senderId, receiverId, message) => {
   } else {
     socket.emit(SOCKET_EVENTS.USER_EVENTS.USER_MESSAGE_EVENT, messages);
   }
-};
-
-const getLastMessagesForUsers = async (id) => {
-  const users = await prisma.user.findMany({
-    where: {
-      id: {
-        not: id,
-      },
-    },
-    include: {
-      sentMessages: {
-        orderBy: { createdAt: "desc" },
-        take: 1,
-      },
-      receivedMessages: {
-        orderBy: { createdAt: "desc" },
-        take: 1,
-      },
-    },
-  });
-
-  const usersWithLastMessage = users.map((user) => {
-    const lastSentMessage = user.sentMessages[0];
-    const lastReceivedMessage = user.receivedMessages[0];
-
-    let lastMessage = null;
-    if (lastSentMessage && lastReceivedMessage) {
-      lastMessage = lastSentMessage.createdAt > lastReceivedMessage.createdAt ? lastSentMessage : lastReceivedMessage;
-    } else if (lastSentMessage) {
-      lastMessage = lastSentMessage;
-    } else if (lastReceivedMessage) {
-      lastMessage = lastReceivedMessage;
-    }
-
-    return {
-      id: user.id,
-      number: user.number,
-      name: user.name,
-      isOnline: user.isOnline,
-      lastMessage,
-    };
-  });
-
-  return usersWithLastMessage;
 };
 
 module.exports = setupSocketEvents;
