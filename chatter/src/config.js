@@ -45,7 +45,7 @@ export class AxiosInstance {
 
   handleError(error) {
     if (error instanceof AxiosError) {
-      toast.error(error.response.data.message);
+      toast.error(error.response?.data?.message);
     } else {
       toast.error("Something went wrong");
     }
@@ -61,26 +61,16 @@ export class AxiosInstance {
  * SOCKET SINGLETON INSTANCE
  */
 class SocketInstance {
+  static instance = null;
   constructor() {
     if (!SocketInstance.instance) {
       this.socket = io(CONFIG.BOT_SERVER_ENDPOINT, {
         transports: ["websocket", "polling", "flashsocket"],
       });
-      this.setupInterceptors();
       SocketInstance.instance = this;
     }
 
     return SocketInstance.instance;
-  }
-
-  setupInterceptors() {
-    this.socket.on("connect_error", (err) => {
-      console.error("Connection error:", err);
-    });
-
-    this.socket.on("disconnect", () => {
-      console.warn("Socket disconnected");
-    });
   }
 
   on(event, handler) {
@@ -106,10 +96,3 @@ class SocketInstance {
 
 export const socket = new SocketInstance();
 export const AXIOS_INSTANCE = new AxiosInstance().getInstance();
-
-/**
- * WE FREEZE THE SINGLETON TO PREVENT
- * MODIFICATIONS
- */
-Object.freeze(socket);
-Object.freeze(AXIOS_INSTANCE);

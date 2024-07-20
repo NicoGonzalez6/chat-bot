@@ -143,6 +143,10 @@
         font-size: 40px;
       }
 
+      &__name {
+        text-transform: capitalize;
+      }
+
       > h1 {
         font-weight: 400;
         margin-left: 10px;

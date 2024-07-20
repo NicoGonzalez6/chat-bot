@@ -6,8 +6,11 @@ export const SOCKET_EVENTS = {
     BOT_TYPING_EVENT: "bot-typing",
   },
   USER_EVENTS: {
-    USER_ONLINE: "user_online",
+    USER_ONLINE: "user-online",
+    USERS_ONLINE: "users-online",
     USER_MESSAGE_EVENT: "user-message",
+    USER_TYPING: "user-typing",
+    USER_STOP_TYPING: "user-stop-typing",
   },
 };
 
@@ -22,7 +25,7 @@ export const TOAST_MESSAGES = {
 export const ENDPOINTS = {
   SIGN_UP: "/auth/sign-up",
   SIGN_IN: "/auth/sign-in",
-  GET_CONTACTS: "/user",
+  GET_MESSAGES: "/messages",
 };
 
 export const USER_STORAGE_KEY = "UserStorageSettings";

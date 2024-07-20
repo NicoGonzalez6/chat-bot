@@ -21,6 +21,7 @@ export const AuthContextProvider = ({ children }) => {
       isAuthenticated: true,
       number: data.user.number,
       name: data.user.name,
+      id: data.user.id,
       isLoading: false,
     });
   };

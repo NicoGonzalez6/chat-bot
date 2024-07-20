@@ -3,4 +3,5 @@ export const INITIAL_AUTH_STATE = {
   name: undefined,
   number: undefined,
   isLoading: false,
+  id: undefined,
 };
