@@ -1,12 +1,12 @@
-import { expect, it } from "vitest";
+import { expect, it, describe } from "vitest";
 import { render, screen } from "@testing-library/react";
 import UserProfile from "./UserProfile";
 
 /**
- * SIMPLE TEST CASE FOR THE INPUT COMPONENT
+ * SIMPLE TEST CASE FOR THE USER PROFILE COMPONENT
  */
-describe("Input", () => {
-  it("renders the input component", () => {
+describe("User profile component", () => {
+  it("renders the user profile component", () => {
     render(<UserProfile color="#000" name="Nico Gonzalez" />);
 
     const Profile = screen.getByTestId("user-profile");

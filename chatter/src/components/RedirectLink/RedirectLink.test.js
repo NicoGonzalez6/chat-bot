@@ -5,9 +5,9 @@ import { RedirectLink } from "./RedirectLink";
 import { BrowserRouter } from "react-router-dom";
 
 /**
- * SIMPLE TEST CASE FOR THE RENDER REDIRECT LINK COMPONENT
+ * SIMPLE TEST CASE FOR THE REDIRECT LINK COMPONENT
  */
-describe("Redirect Link", () => {
+describe("Redirect link component", () => {
   const childrenText = "redirect test";
 
   it("renders the redirect link component", () => {

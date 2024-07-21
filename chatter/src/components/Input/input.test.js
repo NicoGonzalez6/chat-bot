@@ -1,11 +1,11 @@
-import { expect, it } from "vitest";
+import { expect, it, describe } from "vitest";
 import { render, screen } from "@testing-library/react";
 import { Input } from "./Input";
 
 /**
  * SIMPLE TEST CASE FOR THE INPUT COMPONENT
  */
-describe("Input", () => {
+describe("Input component", () => {
   it("renders the input component", () => {
     render(<Input label="Email" />);
 
