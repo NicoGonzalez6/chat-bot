@@ -1,14 +1,25 @@
-const { SOCKET_EVENTS } = require("../constants");
 const { prisma } = require("../prisma/prisma.client");
-const { MIN_TYPING_S, MAX_TYPING_S, MIN_NATURAL_PAUSE_S, MAX_NATURAL_PAUSE_S, DEFAULT_BOT_USER, RESPONSES_FILE_PATH } = require("../constants");
+const { MIN_TYPING_S, MAX_TYPING_S, MIN_NATURAL_PAUSE_S, MAX_NATURAL_PAUSE_S, DEFAULT_BOT_USER, RESPONSES_FILE_PATH, SOCKET_EVENTS } = require("../constants");
 const getRandomDelay = require("./getRandomDelay");
 const getBotResponse = require("./getBotResponse");
 const parseResponseDataset = require("./parseResponseDataset");
 
 let botResponses = null;
+
+// Since this is a small app we keep track of the
+// online users on memory
 const activeUsers = new Map();
 
-const handleUserChat = (socket) => {
+/**
+ * =========================================
+ *              MAIN SOCKET EVENTS HANDLERS
+ * =========================================
+ * This section contains the main handlers
+ * for socket events.
+ */
+
+// Function to control users chat between users or bot
+const handleUsersChat = (socket) => {
   socket.on(SOCKET_EVENTS.USER_EVENTS.USER_TYPING, ({ senderId, receiverId }) => {
     emitTypingEvent(socket, SOCKET_EVENTS.USER_EVENTS.USER_TYPING, { senderId, receiverId });
   });
@@ -21,12 +32,13 @@ const handleUserChat = (socket) => {
     if (receiverId === DEFAULT_BOT_USER.id) {
       await handleBotChat(socket, senderId, message);
     } else {
-      await handleUsersChat(socket, senderId, receiverId, message);
+      await handleUserChat(socket, senderId, receiverId, message);
     }
   });
 };
 
-const handleUserOnline = async (socket, id, io) => {
+// Function to update users session on connect
+const handlerUsersSession = async (socket, id, io) => {
   activeUsers.set(id, socket.id);
   await prisma.user.update({
     where: { id },
@@ -36,7 +48,8 @@ const handleUserOnline = async (socket, id, io) => {
   io.emit(SOCKET_EVENTS.USER_EVENTS.USERS_ONLINE, users);
 };
 
-const handleDisconnect = async (socket) => {
+// Function to update users session on disconnect
+const handleUsersDisconnect = async (socket) => {
   for (const [id, socketId] of activeUsers.entries()) {
     if (socketId === socket.id) {
       activeUsers.delete(id);
@@ -51,18 +64,15 @@ const handleDisconnect = async (socket) => {
   }
 };
 
-const setupSocketEvents = (io) => {
-  io.on(SOCKET_EVENTS.GLOBAL_EVENTS.CONNECTION, (socket) => {
-    socket.on(SOCKET_EVENTS.USER_EVENTS.USER_ONLINE, (id) => handleUserOnline(socket, id, io));
-    socket.on(SOCKET_EVENTS.USER_EVENTS.DISCONNECT, () => handleDisconnect(socket));
-    handleUserChat(socket);
-  });
+/**
+ * =========================================
+ *             SOCKET EVENTS HELPERS
+ * =========================================
+ * This section contains the socket helpers
+ * functions for the main handlers.
+ */
 
-  parseResponseDataset(RESPONSES_FILE_PATH).then((parsedResponses) => {
-    botResponses = parsedResponses;
-  });
-};
-
+// function to emit typing events between users or with bot
 const emitTypingEvent = (socket, event, { senderId, receiverId }) => {
   const receiverSocketId = activeUsers.get(receiverId);
   if (receiverSocketId) {
@@ -117,8 +127,8 @@ const handleBotChat = async (socket, senderId, message) => {
     }, pauseDelay);
   }
 };
-
-const handleUsersChat = async (socket, senderId, receiverId, message) => {
+// Function to handle chats between users online or offline
+const handleUserChat = async (socket, senderId, receiverId, message) => {
   const receiverSocketId = activeUsers.get(receiverId);
 
   await prisma.message.create({
@@ -146,6 +156,25 @@ const handleUsersChat = async (socket, senderId, receiverId, message) => {
   } else {
     socket.emit(SOCKET_EVENTS.USER_EVENTS.USER_MESSAGE_EVENT, messages);
   }
+};
+
+/**
+ * =========================================
+ *         GLOBAL SOCKET EVENT
+ * =========================================
+ * This is the main socket event that
+ * we have to call in the app section.
+ */
+const setupSocketEvents = (io) => {
+  io.on(SOCKET_EVENTS.GLOBAL_EVENTS.CONNECTION, (socket) => {
+    socket.on(SOCKET_EVENTS.USER_EVENTS.USER_ONLINE, (id) => handlerUsersSession(socket, id, io));
+    socket.on(SOCKET_EVENTS.USER_EVENTS.DISCONNECT, () => handleUsersDisconnect(socket));
+    handleUsersChat(socket);
+  });
+
+  parseResponseDataset(RESPONSES_FILE_PATH).then((parsedResponses) => {
+    botResponses = parsedResponses;
+  });
 };
 
 module.exports = setupSocketEvents;
