@@ -54,30 +54,36 @@ function Messages({ activeContact, currentUserId }) {
         senderId: currentUserId,
         receiverId: activeContact?.id,
       });
-    }, 300),
+    }, 0),
     [currentUserId, activeContact?.id]
   );
 
-  useEffect(() => {
-    const handleUserTyping = ({ senderId }) => {
+  const handleUserTyping = useCallback(
+    ({ senderId }) => {
       if (senderId === activeContact?.id) {
         setIsTyping({
           typingFrom: senderId,
           typingNow: true,
         });
       }
-    };
+    },
+    [activeContact?.id]
+  );
 
-    const handleUserStopTyping = ({ senderId }) => {
+  const handleUserStopTyping = useCallback(
+    ({ senderId }) => {
       if (senderId === activeContact?.id) {
         setIsTyping({
           typingNow: false,
           typingFrom: undefined,
         });
       }
-    };
+    },
+    [activeContact?.id]
+  );
 
-    const handleNewMessages = (newMessages) => {
+  const handleNewMessages = useCallback(
+    (newMessages) => {
       if (Array.isArray(newMessages)) {
         const filteredMessages = newMessages.some(
           (msg) => (msg.receiverId === currentUserId && msg.senderId === activeContact?.id) || (msg.receiverId === activeContact?.id && msg.senderId === currentUserId)
@@ -86,8 +92,21 @@ function Messages({ activeContact, currentUserId }) {
           setMessages(newMessages);
         }
       }
-    };
+    },
+    [activeContact?.id]
+  );
 
+  const getMessages = useCallback(async () => {
+    const response = await AXIOS_INSTANCE.get(ENDPOINTS.GET_MESSAGES, {
+      params: {
+        senderId: currentUserId,
+        receiverId: activeContact?.id,
+      },
+    });
+    setMessages(response);
+  }, [activeContact?.id]);
+
+  useEffect(() => {
     socket.on(SOCKET_EVENTS.USER_EVENTS.USER_TYPING, handleUserTyping);
     socket.on(SOCKET_EVENTS.USER_EVENTS.USER_STOP_TYPING, handleUserStopTyping);
     socket.on(SOCKET_EVENTS.USER_EVENTS.USER_MESSAGE_EVENT, handleNewMessages);
@@ -112,20 +131,10 @@ function Messages({ activeContact, currentUserId }) {
   }, [message, sendTypingEvent, sendStopTypingEvent]);
 
   useEffect(() => {
-    const getMessages = async () => {
-      const response = await AXIOS_INSTANCE.get(ENDPOINTS.GET_MESSAGES, {
-        params: {
-          senderId: currentUserId,
-          receiverId: activeContact?.id,
-        },
-      });
-      setMessages(response);
-    };
-
     if (currentUserId && activeContact) {
       getMessages();
     }
-  }, [activeContact]);
+  }, [activeContact?.id]);
 
   const endOfMessagesRef = useRef();
 
