@@ -1,4 +1,4 @@
-import React, { memo, useCallback, useEffect, useState } from "react";
+import React, { memo, useCallback, useEffect, useRef, useState } from "react";
 import Header from "./Header";
 import Footer from "./Footer";
 import Typing from "./TypingMessage";
@@ -77,7 +77,7 @@ function Messages({ activeContact, currentUserId }) {
       }
     };
 
-    const handleNewMessage = (newMessages) => {
+    const handleNewMessages = (newMessages) => {
       if (Array.isArray(newMessages)) {
         const filteredMessages = newMessages.some(
           (msg) => (msg.receiverId === currentUserId && msg.senderId === activeContact?.id) || (msg.receiverId === activeContact?.id && msg.senderId === currentUserId)
@@ -90,12 +90,12 @@ function Messages({ activeContact, currentUserId }) {
 
     socket.on(SOCKET_EVENTS.USER_EVENTS.USER_TYPING, handleUserTyping);
     socket.on(SOCKET_EVENTS.USER_EVENTS.USER_STOP_TYPING, handleUserStopTyping);
-    socket.on(SOCKET_EVENTS.USER_EVENTS.USER_MESSAGE_EVENT, handleNewMessage);
+    socket.on(SOCKET_EVENTS.USER_EVENTS.USER_MESSAGE_EVENT, handleNewMessages);
 
     return () => {
       socket.off(SOCKET_EVENTS.USER_EVENTS.USER_TYPING, handleUserTyping);
       socket.off(SOCKET_EVENTS.USER_EVENTS.USER_STOP_TYPING, handleUserStopTyping);
-      socket.off(SOCKET_EVENTS.USER_EVENTS.USER_MESSAGE_EVENT, handleNewMessage);
+      socket.off(SOCKET_EVENTS.USER_EVENTS.USER_MESSAGE_EVENT, handleNewMessages);
     };
   }, [activeContact?.id]);
 
@@ -127,6 +127,12 @@ function Messages({ activeContact, currentUserId }) {
     }
   }, [activeContact]);
 
+  const endOfMessagesRef = useRef();
+
+  useEffect(() => {
+    endOfMessagesRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages]);
+
   return (
     <div className="messages">
       <Header isOnline={activeContact?.isOnline} name={activeContact?.name} />
@@ -139,6 +145,7 @@ function Messages({ activeContact, currentUserId }) {
           return <Message message={currentMessage} key={i} />;
         })}
         {isTyping.typingNow && isTyping.typingFrom === activeContact?.id && <Typing />}
+        <div ref={endOfMessagesRef} />
       </div>
       <Footer message={message} sendMessage={handleSendMessage} onChangeMessage={handleMessageChange} />
     </div>
