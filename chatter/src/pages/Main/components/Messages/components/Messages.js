@@ -14,6 +14,9 @@ const INITIAL_TYPING_STATE = {
   typingFrom: undefined,
 };
 
+/**
+ * Here the main message logic will be handled
+ */
 function Messages({ activeContact, currentUserId }) {
   const [playSend] = useSound(CONFIG.SEND_AUDIO);
   const [playReceive] = useSound(CONFIG.RECEIVE_AUDIO);
