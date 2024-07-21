@@ -18,6 +18,11 @@ export default defineConfig({
   server: {
     open: true,
   },
+  test: {
+    environment: "jsdom",
+    globals: true,
+    setupFiles: ["./setupTests.js"],
+  },
   optimizeDeps: {
     force: true,
     esbuildOptions: {
