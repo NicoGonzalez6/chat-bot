@@ -14,8 +14,6 @@ export const SOCKET_EVENTS = {
   },
 };
 
-export const CAROL_DEFAULT_MESSAGE = "Hi! My name's Carol.";
-
 export const TOAST_MESSAGES = {
   REGISTER: {
     WELCOME: "Welcome to chatter",
