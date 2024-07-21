@@ -72,7 +72,7 @@ const handleUsersDisconnect = async (socket) => {
  * functions for the main handlers.
  */
 
-// function to emit typing events between users or with bot
+// function to emit typing events between users
 const emitTypingEvent = (socket, event, { senderId, receiverId }) => {
   const receiverSocketId = activeUsers.get(receiverId);
   if (receiverSocketId) {
