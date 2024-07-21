@@ -15,8 +15,6 @@ export const CONFIG = {
  * AXIOS SINGLETON INSTANCE
  */
 export class AxiosInstance {
-  static instance = null;
-
   constructor() {
     if (AxiosInstance.instance) {
       return AxiosInstance.instance;
@@ -61,7 +59,6 @@ export class AxiosInstance {
  * SOCKET SINGLETON INSTANCE
  */
 class SocketInstance {
-  static instance = null;
   constructor() {
     if (!SocketInstance.instance) {
       this.socket = io(CONFIG.BOT_SERVER_ENDPOINT, {

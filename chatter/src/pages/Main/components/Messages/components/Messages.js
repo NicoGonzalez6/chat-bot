@@ -144,8 +144,10 @@ function Messages({ activeContact, currentUserId }) {
 
   const endOfMessagesRef = useRef();
 
+  const scrollToBottom = () => endOfMessagesRef.current?.scrollIntoView({ behavior: "smooth" });
+
   useEffect(() => {
-    endOfMessagesRef.current?.scrollIntoView({ behavior: "smooth" });
+    scrollToBottom();
   }, [messages]);
 
   return (

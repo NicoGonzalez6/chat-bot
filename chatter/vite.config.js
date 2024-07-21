@@ -1,5 +1,6 @@
 import { defineConfig, transformWithEsbuild } from "vite";
 import react from "@vitejs/plugin-react";
+import eslintPlugin from "vite-plugin-eslint";
 
 export default defineConfig({
   plugins: [
@@ -14,6 +15,11 @@ export default defineConfig({
       },
     },
     react(),
+    eslintPlugin({
+      cache: false,
+      include: ["./src/**/*.js", "./src/**/*.jsx"],
+      exclude: [],
+    }),
   ],
   server: {
     open: true,
