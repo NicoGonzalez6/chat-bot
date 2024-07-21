@@ -24,6 +24,7 @@ const MIN_TYPING_S = 1;
 const MAX_TYPING_S = 3;
 const MIN_NATURAL_PAUSE_S = 0.5;
 const MAX_NATURAL_PAUSE_S = 2;
+const CAROL_DEFAULT_MESSAGE = "Hi! My name's Carol.";
 
 // Default bot users
 const DEFAULT_BOT_USER = {
@@ -67,4 +68,5 @@ module.exports = {
   MAX_TYPING_S,
   MIN_NATURAL_PAUSE_S,
   MAX_NATURAL_PAUSE_S,
+  CAROL_DEFAULT_MESSAGE,
 };

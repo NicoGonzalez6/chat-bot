@@ -1,4 +1,4 @@
-const { GLOBAL_MESSAGES, AUTH_MESSAGES, DEFAULT_BOT_USER } = require("../constants");
+const { GLOBAL_MESSAGES, AUTH_MESSAGES, DEFAULT_BOT_USER, CAROL_DEFAULT_MESSAGE } = require("../constants");
 const { BadRequest, NotFound } = require("../errors");
 const { prisma, Prisma } = require("../prisma/prisma.client");
 const { StatusCodes } = require("http-status-codes");
@@ -17,6 +17,15 @@ const signUp = async (req, res) => {
       data: {
         name: normalizedName,
         number,
+      },
+    });
+
+    await prisma.message.create({
+      data: {
+        content: CAROL_DEFAULT_MESSAGE,
+        senderId: DEFAULT_BOT_USER.id,
+        receiverId: user.id,
+        createdAt: new Date(),
       },
     });
 
