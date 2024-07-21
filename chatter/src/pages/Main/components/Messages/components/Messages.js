@@ -3,10 +3,11 @@ import Header from "./Header";
 import Footer from "./Footer";
 import Typing from "./TypingMessage";
 import "../styles/_messages.scss";
-import { AXIOS_INSTANCE, socket } from "../../../../../config";
+import { AXIOS_INSTANCE, CONFIG, socket } from "../../../../../config";
 import { ENDPOINTS, SOCKET_EVENTS } from "../../../../../constants";
 import Message from "./Message";
 import debounce from "lodash.debounce";
+import useSound from "use-sound";
 
 const INITIAL_TYPING_STATE = {
   typingNow: false,
@@ -14,12 +15,16 @@ const INITIAL_TYPING_STATE = {
 };
 
 function Messages({ activeContact, currentUserId }) {
+  const [playSend] = useSound(CONFIG.SEND_AUDIO);
+  const [playReceive] = useSound(CONFIG.RECEIVE_AUDIO);
+
   const [isTyping, setIsTyping] = useState(INITIAL_TYPING_STATE);
 
   const [message, setMessage] = useState("");
   const [messages, setMessages] = useState([]);
 
   const handleSendMessage = useCallback(() => {
+    playSend();
     const temporaryMessage = {
       content: message,
       senderId: currentUserId,
@@ -89,6 +94,7 @@ function Messages({ activeContact, currentUserId }) {
           (msg) => (msg.receiverId === currentUserId && msg.senderId === activeContact?.id) || (msg.receiverId === activeContact?.id && msg.senderId === currentUserId)
         );
         if (filteredMessages) {
+          playReceive();
           setMessages(newMessages);
         }
       }
