@@ -1,6 +1,6 @@
-import React from 'react';
-import ICONS from '../constants/icons';
-import '../styles/_icon-background.scss';
+import React from "react";
+import ICONS from "../constants/icons";
+import "../styles/_icon-background.scss";
 
 const SPACING_PX = 125;
 const SPACING_MARGIN = SPACING_PX / 4;
@@ -16,11 +16,12 @@ function getRandomIcon() {
 function IconRow({ numberOfIcons }) {
   return (
     <div className="icon-background__row">
-      {[...new Array(numberOfIcons)].map(() => {
+      {[...new Array(numberOfIcons)].map((_, i) => {
         const icon = getRandomIcon();
 
         return (
           <i
+            key={i}
             aria-hidden="true"
             className={icon.name}
             style={{
@@ -43,9 +44,9 @@ export default function IconBackground() {
 
   return (
     <div className="icon-background">
-      {[...new Array(numberOfRows)].map(() => (
-        <IconRow numberOfIcons={numberOfElsPerRow} />
-      ))}
+      {[...new Array(numberOfRows)].map((_, i) => {
+        return <IconRow numberOfIcons={numberOfElsPerRow} key={i} />;
+      })}
     </div>
-  )
+  );
 }
